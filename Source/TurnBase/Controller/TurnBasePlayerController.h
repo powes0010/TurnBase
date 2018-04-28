@@ -42,6 +42,7 @@ protected:
 	void OnSetDestinationPressed();
 	void OnSetDestinationReleased();
 
+	void DoEnemySelect();
 public:
 	bool bIsInBattleLevel = false;
 };

@@ -20,6 +20,7 @@ class TURNBASE_API UUIBattleWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
+	FORCEINLINE void InitLevelActor(class ABaseBattleLevelActor* CurLevelActor) { LecelActor = CurLevelActor; }
 protected:
 	UButton * AtkBtn = nullptr;
 
@@ -28,4 +29,13 @@ protected:
 	UButton* DefenseBtn = nullptr;
 
 	UVerticalBox* AttackOrderPanel = nullptr;
+
+	ABaseBattleLevelActor* LecelActor = nullptr;
+
+protected:
+	UFUNCTION()
+		void OnAttackBthClick();
+
+public:
+	void SetAttackOrderVisible(bool NewVis);
 };

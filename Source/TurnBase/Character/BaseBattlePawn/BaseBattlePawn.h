@@ -26,6 +26,7 @@ protected:
 		class UWidgetComponent* WidgetComComponent;
 
 	class UUIHPWidget* HPWidget = nullptr;
+
 public:
 	UPROPERTY(EditDefaultsOnly)
 		float HP = 100.f;

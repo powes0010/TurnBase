@@ -9,10 +9,9 @@ void UUIHPWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	NameTxt = Cast<UTextBlock>(GetWidgetFromName(TEXT("NameTxt")));
-
 	HPTxt = Cast<UTextBlock>(GetWidgetFromName(TEXT("HPTxt")));
-
 	ArrowImage = Cast<UImage>(GetWidgetFromName(TEXT("Arrow")));
+	SelectImage = Cast<UImage>(GetWidgetFromName(TEXT("Selected")));
 }
 
 void UUIHPWidget::SetArrowVisible(bool NewVis)
@@ -23,3 +22,10 @@ void UUIHPWidget::SetArrowVisible(bool NewVis)
 	}
 }
 
+void UUIHPWidget::SetSelectedImageVisible(bool NewVis)
+{
+	if (SelectImage)
+	{
+		SelectImage->SetVisibility(NewVis ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	}
+}

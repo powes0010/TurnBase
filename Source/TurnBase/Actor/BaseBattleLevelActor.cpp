@@ -81,6 +81,10 @@ void ABaseBattleLevelActor::BeginPlay()
 		if (BattleUIClass)
 		{
 			BattleUI = CreateWidget<UUIBattleWidget>(GetWorld(), BattleUIClass);
+			if (BattleUI)
+			{
+				BattleUI->InitLevelActor(this);
+			}
 		}
 	}
 }
@@ -90,8 +94,52 @@ void ABaseBattleLevelActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	BattleTick(DeltaTime);
+	DoEnemySelect();
 }
 
+void ABaseBattleLevelActor::DoEnemySelect()
+{
+	if (bIsInEnemySelect)
+	{
+		ATurnBasePlayerController* TSC = Cast<ATurnBasePlayerController>(GetWorld()->GetFirstPlayerController());
+		if (TSC)
+		{
+			FVector StartTrace = FVector::ZeroVector;
+			FRotator UnusedRot;
+			TSC->GetPlayerViewPoint(StartTrace, UnusedRot);
+
+			FVector MouseLoc = FVector::ZeroVector;
+			FVector MouseDir = FVector::ZeroVector;
+			bool bSuc = TSC->DeprojectMousePositionToWorld(MouseLoc, MouseDir);
+			if (bSuc)
+			{
+				FHitResult result;
+				FCollisionObjectQueryParams Params(ECC_Pawn);
+				GetWorld()->LineTraceSingleByObjectType(result, StartTrace, StartTrace + MouseDir * 1000.f, Params);
+
+				if (result.bBlockingHit)
+				{
+					ABaseBattlePawn* target = Cast<ABaseBattlePawn>(result.GetActor());
+					if (target && CurSelectEnemy != target)
+					{
+						if (EnemyPawns.Contains(target))
+						{
+							if (CurSelectEnemy && CurSelectEnemy->GetHPWidget())
+							{
+								CurSelectEnemy->GetHPWidget()->SetSelectedImageVisible(false);
+							}
+							CurSelectEnemy = target;
+							if (target->GetHPWidget())
+							{
+								target->GetHPWidget()->SetSelectedImageVisible(true);
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+}
 
 void ABaseBattleLevelActor::BattleStart(class ATurnBaseCharacter* player, class ABaseEnemy* enemy)
 {
@@ -100,6 +148,8 @@ void ABaseBattleLevelActor::BattleStart(class ATurnBaseCharacter* player, class 
 		ATurnBasePlayerController* TSC = Cast<ATurnBasePlayerController>(GetWorld()->GetFirstPlayerController());
 		if (TSC)
 		{
+			TSC->CurBattleLevelActor = this;
+
 			Player = player;
 			Enemy = enemy;
 
@@ -159,7 +209,7 @@ void ABaseBattleLevelActor::BattleTick(float DeltaTime)
 			if (It.Value().FightSeq > 100.f)
 			{
 				bIsInBattleTick = false;
-				PlayerDoAttack(It.Key());
+				PlayerSelectEnemy(It.Key());
 				
 				break;
 			}
@@ -172,14 +222,42 @@ void ABaseBattleLevelActor::BattleTick(float DeltaTime)
 
 }
 
-void ABaseBattleLevelActor::PlayerDoAttack(class ABaseBattlePawn* Attacker)
+void ABaseBattleLevelActor::PlayerSelectEnemy(class ABaseBattlePawn* Attacker)
 {
 	if (Attacker)
 	{
+		CurAttacker = Attacker;
 		if (Attacker->GetHPWidget())
 		{
 			Attacker->GetHPWidget()->SetArrowVisible(true);
 		}
-		
+		if (BattleUI)
+		{
+			BattleUI->SetAttackOrderVisible(true);
+		}
+	}
+}
+
+void ABaseBattleLevelActor::PlayerDoAttack()
+{
+	if (CurAttacker && CurSelectEnemy && bIsInEnemySelect)
+	{
+		bIsInEnemySelect = false;
+		if (BattleUI)
+		{
+			BattleUI->SetAttackOrderVisible(false);
+		}
+		DoAttack(CurAttacker, CurSelectEnemy, true);
+
+	}
+}
+
+void ABaseBattleLevelActor::DoAttack(ABaseBattlePawn* Attacker, ABaseBattlePawn* Target, bool bIsPlayerAtk)
+{
+	UArrowComponent* TarArrow = bIsPlayerAtk ? BlueGroup[EnemyPawns[Target].LocIndex] : RedGroup[PlayerPawns[Target].LocIndex];
+	if (TarArrow)
+	{
+		FVector TarLoc = TarArrow->GetComponentLocation() + TarArrow->GetForwardVector() * 50.f;
+
 	}
 }

@@ -29,6 +29,7 @@ struct FPawnMsg
 };
 
 class UUIBattleWidget;
+class ABaseBattlePawn;
 
 UCLASS()
 class TURNBASE_API ABaseBattleLevelActor : public AActor
@@ -40,6 +41,8 @@ public:
 	ABaseBattleLevelActor();
 
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return BattleLevelCamera; }
+
+	FORCEINLINE	void SetIsInEnemySelect(bool InBool) { bIsInEnemySelect = InBool; }
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -62,20 +65,28 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Arrow, meta = (AllowPrivateAccess = "true"))
 		TArray<class UArrowComponent*> BlueGroup;
 
+	UPROPERTY()
+		UUIBattleWidget* BattleUI;
+
 	class ATurnBaseCharacter* Player = nullptr;
 
 	class ABaseEnemy* Enemy = nullptr;
 
 	UPROPERTY()
-		TMap<class ABaseBattlePawn*, FPawnMsg> PlayerPawns;
+		TMap<ABaseBattlePawn*, FPawnMsg> PlayerPawns;
 
 	UPROPERTY()
-		TMap<class ABaseBattlePawn*, FPawnMsg> EnemyPawns;
+		TMap<ABaseBattlePawn*, FPawnMsg> EnemyPawns;
 
 	bool bIsInBattleTick = false;
 
-	UPROPERTY()
-		UUIBattleWidget* BattleUI;
+	bool bIsInEnemySelect = false;
+
+	
+
+	ABaseBattlePawn* CurAttacker = nullptr;
+
+	ABaseBattlePawn* CurSelectEnemy = nullptr;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -89,7 +100,11 @@ public:
 
 	void BattleEnd(class ATurnBaseCharacter* player, class ABaseEnemy* enemy);
 
+	void PlayerDoAttack();
 protected:
-	void PlayerDoAttack(class ABaseBattlePawn* Attacker);
+	void PlayerSelectEnemy(ABaseBattlePawn* Attacker);
 	
+	void DoEnemySelect();
+
+	void DoAttack(ABaseBattlePawn* Attacker, ABaseBattlePawn* Target, bool bIsPlayerAtk);
 };

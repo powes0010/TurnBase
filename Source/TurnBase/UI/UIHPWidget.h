@@ -27,6 +27,10 @@ protected:
 
 	UImage* ArrowImage = nullptr;
 	
+	UImage* SelectImage = nullptr;
+
 public:
 	void SetArrowVisible(bool NewVis);
+
+	void SetSelectedImageVisible(bool NewVis);
 };
