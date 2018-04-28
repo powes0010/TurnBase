@@ -28,6 +28,7 @@ struct FPawnMsg
 	{}
 };
 
+class UUIBattleWidget;
 
 UCLASS()
 class TURNBASE_API ABaseBattleLevelActor : public AActor
@@ -55,9 +56,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 		TArray<FVector> BlueArrowLoc;
 
-	TArray<class UArrowComponent*> RedGroup;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Arrow, meta = (AllowPrivateAccess = "true"))
+		TArray<class UArrowComponent*> RedGroup;
 
-	TArray<class UArrowComponent*> BlueGroup;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Arrow, meta = (AllowPrivateAccess = "true"))
+		TArray<class UArrowComponent*> BlueGroup;
 
 	class ATurnBaseCharacter* Player = nullptr;
 
@@ -70,6 +73,9 @@ protected:
 		TMap<class ABaseBattlePawn*, FPawnMsg> EnemyPawns;
 
 	bool bIsInBattleTick = false;
+
+	UPROPERTY()
+		UUIBattleWidget* BattleUI;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -84,6 +90,6 @@ public:
 	void BattleEnd(class ATurnBaseCharacter* player, class ABaseEnemy* enemy);
 
 protected:
-	
+	void PlayerDoAttack(class ABaseBattlePawn* Attacker);
 	
 };

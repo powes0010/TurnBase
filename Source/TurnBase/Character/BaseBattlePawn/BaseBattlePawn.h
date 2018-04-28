@@ -17,6 +17,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	FORCEINLINE class UUIHPWidget* GetHPWidget() { return HPWidget; }
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -24,15 +25,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
 		class UWidgetComponent* WidgetComComponent;
 
+	class UUIHPWidget* HPWidget = nullptr;
 public:
 	UPROPERTY(EditDefaultsOnly)
-	float HP = 100.f;
+		float HP = 100.f;
 	UPROPERTY(EditDefaultsOnly)
-	float MaxHP = 100.f;
+		float MaxHP = 100.f;
 	UPROPERTY(EditDefaultsOnly)
-	float ATK = 10.f;
+		float ATK = 10.f;
 	UPROPERTY(EditDefaultsOnly)
-	float Speed = 100.f;
+		float Speed = 100.f;
 	
-	
+
+
 };

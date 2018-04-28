@@ -8,9 +8,12 @@
 #include "Components/ArrowComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
-
+#include "UI/UIHPWidget.h"
+#include "UI/UIBattleWidget.h"
 
 const int32  SeatingNum = 6;
+
+
 
 // Sets default values
 ABaseBattleLevelActor::ABaseBattleLevelActor()
@@ -62,6 +65,9 @@ ABaseBattleLevelActor::ABaseBattleLevelActor()
 		arrow->SetRelativeRotation(FRotator(0.f, 180.f, 0.f));
 		BlueGroup.Add(arrow);
 	}
+
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +75,14 @@ void ABaseBattleLevelActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (!BattleUI)
+	{
+		UClass* BattleUIClass = LoadClass<UUIBattleWidget>(NULL, TEXT("/Game/Blueprint/UI/BPW_BattleWidget.BPW_BattleWidget_C"));
+		if (BattleUIClass)
+		{
+			BattleUI = CreateWidget<UUIBattleWidget>(GetWorld(), BattleUIClass);
+		}
+	}
 }
 
 // Called every frame
@@ -83,13 +97,19 @@ void ABaseBattleLevelActor::BattleStart(class ATurnBaseCharacter* player, class 
 {
 	if (player && enemy)
 	{
-		Player = player;
-		Enemy = enemy;
-
 		ATurnBasePlayerController* TSC = Cast<ATurnBasePlayerController>(GetWorld()->GetFirstPlayerController());
 		if (TSC)
 		{
+			Player = player;
+			Enemy = enemy;
+
+			bIsInBattleTick = true;
 			TSC->bIsInBattleLevel = true;
+
+			if (BattleUI)
+			{
+				BattleUI->AddToViewport();
+			}
 
 			for (int32 i = 0; i < FMath::Min<int32>(Player->GetPartners().Num(), SeatingNum); i++)
 			{
@@ -133,17 +153,33 @@ void ABaseBattleLevelActor::BattleTick(float DeltaTime)
 {
 	if (bIsInBattleTick)
 	{
-		for (int32 i = 0; i < PlayerPawns.Num(); i++)
+		for ( auto It = PlayerPawns.CreateIterator(); It ; ++It)
 		{
-
+			It.Value().FightSeq += It.Key()->Speed * DeltaTime;
+			if (It.Value().FightSeq > 100.f)
+			{
+				bIsInBattleTick = false;
+				PlayerDoAttack(It.Key());
+				
+				break;
+			}
 		}
 	}
 	if (bIsInBattleTick)
 	{
-		for (int32 i = 0; i < EnemyPawns.Num(); i++)
-		{
-
-		}
+		
 	}
 
+}
+
+void ABaseBattleLevelActor::PlayerDoAttack(class ABaseBattlePawn* Attacker)
+{
+	if (Attacker)
+	{
+		if (Attacker->GetHPWidget())
+		{
+			Attacker->GetHPWidget()->SetArrowVisible(true);
+		}
+		
+	}
 }

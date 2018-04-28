@@ -5,7 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Globe/CustomMSG.h"
-
+#include "UI/UIHPWidget.h"
 
 // Sets default values
 ABaseBattlePawn::ABaseBattlePawn()
@@ -30,6 +30,10 @@ void ABaseBattlePawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (WidgetComComponent)
+	{
+		HPWidget = Cast<UUIHPWidget>(WidgetComComponent->GetUserWidgetObject());
+	}
 }
 
 // Called every frame
